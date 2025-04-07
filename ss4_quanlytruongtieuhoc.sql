@@ -1,11 +1,11 @@
-create database quan_ly_truong_tieu_hoc,
-use quan_ly_truong_tieu_hoc,
+create database quan_ly_truong_tieu_hoc;
+use quan_ly_truong_tieu_hoc;
 
 -- tạo bảng giáo viên --
 create table giao_vien(
 ma_GV char(5) primary key,
 ho_ten_GV nvarchar(50)
-),
+);
 -- add dữ liệu --
 insert into giao_vien(ma_GV, ho_ten_GV)
 values
@@ -18,7 +18,7 @@ values
 ('GV007', 'Nguyễn Sơn Tùng'),
 ('GV008', 'Nguyễn Bảo Khánh'),
 ('GV009', 'Trịnh Trần Phương Tuấn'),
-('GV010', 'Nguyễn Trúc Thuỷ Tiên'),
+('GV010', 'Nguyễn Trúc Thuỷ Tiên');
 -- tạo bảng lớp --
 create table lop(
 ma_lop char(5) primary key,
@@ -26,7 +26,7 @@ ten_lop nvarchar(50),
 ma_GVcn char(5),
 nam_hoc varchar(40),
 foreign key (ma_GVcn) references giao_vien(ma_GV)
-),
+);
 -- add dữ liệu -- 
 insert into lop(ma_lop, ten_lop, ma_GVcn, nam_hoc)
 values 
@@ -39,7 +39,7 @@ values
 ('L007', ' Lớp 2B' , 'GV007', '2025-2026'),
 ('L008', ' Lớp 3B' , 'GV010', '2025-2026'),
 ('L009', ' Lớp 4B' , 'GV002', '2025-2026'),
-('L010', ' Lớp 5B' , 'GV004', '2025-2026'),
+('L010', ' Lớp 5B' , 'GV004', '2025-2026');
 -- tạo bảng học sinh --
 create table hoc_sinh(
 ma_hs char(5) primary key,
@@ -49,11 +49,11 @@ gioi_tinh enum('nam', 'nữ'),
 dia_chi nvarchar(255),
 ma_lop char(5),
 foreign key (ma_lop) references lop(ma_lop)
-),
+);
 -- add dữ liệu --
 insert into hoc_sinh(ma_hs, ho_ten_hs, ho_ten_ph, gioi_tinh, dia_chi, ma_lop)
 values 
-('HS001', 'Trịnh Trần Phương Tuấn', 'Nguyễn Bảo Khánh', 'nam', 'Hải Châu ', 'L001'),	
+('HS001', 'Trịnh Trần Phương Tuấn', '', 'nam', 'Hải Châu ', 'L001'),	
 ('HS002', 'Nguyễn Nhật Minh Thư', 'Phan Long', 'nữ', 'Thanh Khê', 'L002'),	
 ('HS003', 'Dương Quốc Hoàng', 'Phạm Quang Minh', 'nam', 'Sơn Trà', 'L003'),	
 ('HS004', 'Nguyễn Lê Gia Hân', 'Trần Trung Trực', 'nữ', 'Ngũ Hành Sơn', 'L004'),	
@@ -270,10 +270,32 @@ values
 ('GV008', 'L008', 'MH003', 'Học kỳ 2'),
 ('GV009', 'L006', 'MH010', 'Học kỳ 2'),
 ('GV010', 'L003', 'MH006', 'Học kỳ 2');
-
-
-
-
+-- select không dùng where --
+-- liệt kê toàn bộ thông tin giáo viên trong trường--
+select * from giao_vien;
+-- họ tên học, giới tính, họ tên phụ huynh của toàn bộ hs --
+select hs.ho_ten_hs, hs.gioi_tinh, hs.ho_ten_ph from hoc_sinh hs;
+-- toàn bộ thông tin của all các lớp --
+select * from lop;
+-- select dùng where --
+-- a. học sinh có giới tính nam --
+select * from hoc_sinh where gioi_tinh = 'nam';
+-- b. học sinh chưa có tên phụ huynh --
+select ho_ten_hs, gioi_tinh, dia_chi from hoc_sinh where ho_ten_ph is null;
+-- c. những lớp chưa có gvcn --
+select * from lop where ma_GVcn is null;
+-- d. học sinh chưa được phân lớp --
+select * from hoc_sinh where ma_lop is null;
+-- e. học sinh nữ có địa chỉ thanh khê --
+select * from hoc_sinh where gioi_tinh = 'nữ' and dia_chi like'%Thanh Khê%';
+-- f. hs nam ở hải châu hoặc hs nữ ở thanh khê --
+select * from hoc_sinh where(gioi_tinh = 'Nam' and dia_chi like '%Hải Châu%') or (gioi_tinh = 'nữ' and dia_chi like '%Thanh Khê%');
+-- g. hs nam chưa có tên ph và hs nữ chưa được phân lớp --
+select * from hoc_sinh where(gioi_tinh = 'nam' and ho_ten_ph is null) or (gioi_tinh = 'nữ' and ma_lop is null);
+-- h. hs nam chưa được phân lớp và chưa có tên ph
+select * from hoc_sinh where gioi_tinh = 'nam' and (ma_lop is null or ho_ten_ph is null);
+-- i. mã môn học của những môn được dạy trong hk2 -- 
+select distinct ma_mh from phu_trach_bo_mon where hoc_ky = 'Học kỳ 2';
 
 
 
@@ -286,3 +308,8 @@ values
 
 
 drop table giao_vien;
+drop table hoc_sinh;
+drop table ket_qua_hoc_tap;
+drop table lop;
+drop table mon_hoc;
+drop table phu_trach_bo_mon;
