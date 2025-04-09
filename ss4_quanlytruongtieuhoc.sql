@@ -53,8 +53,8 @@ foreign key (ma_lop) references lop(ma_lop)
 -- add dữ liệu --
 insert into hoc_sinh(ma_hs, ho_ten_hs, ho_ten_ph, gioi_tinh, dia_chi, ma_lop)
 values 
-('HS001', 'Trịnh Trần Phương Tuấn', '', 'nam', 'Hải Châu ', 'L001'),	
-('HS002', 'Nguyễn Nhật Minh Thư', 'Phan Long', 'nữ', 'Thanh Khê', 'L002'),	
+('HS001', 'Trịnh Trần Phương Tuấn j97 bến tre he he he he he ', '', 'nam', 'Hải Châu ', 'L001'),	
+('HS002', 'nNguyễn Nhật Minh Thư thư heee', 'Phan Long', 'nữ', 'Thanh Khê', 'L002'),	
 ('HS003', 'Dương Quốc Hoàng', 'Phạm Quang Minh', 'nam', 'Sơn Trà', 'L003'),	
 ('HS004', 'Nguyễn Lê Gia Hân', 'Trần Trung Trực', 'nữ', 'Ngũ Hành Sơn', 'L004'),	
 ('HS005', 'Lê Bảo Bình', 'Nguyễn Lê Viết Dũng', 'nam', 'Thanh Khê', 'L005'),	
@@ -135,7 +135,7 @@ values
 ('HS080', 'Võ Hoa', 'Bà Đặng Ngọc', 'nữ', 'Cẩm Lệ', 'L007'),
 ('HS081', 'Đặng Hùng', 'Ông Bùi An', 'nam', 'Liên Chiểu', 'L002'),
 ('HS082', 'Bùi Hương', 'Mẹ Đỗ Bích', 'nữ', 'Sơn Trà', 'L010'),
-('HS083', 'Đỗ Khánh', 'Ba Hồ Cường', 'nam', 'Thanh Khê', 'L004'),
+('HS083', 'Đỗ Khánh Nở', 'Ba Hồ Cường', 'nam', 'Thanh Khê', 'L004'),
 ('HS084', 'Hồ Lan', 'Bà Nguyễn Diệu', 'nữ', 'Ngũ Hành Sơn', 'L008'),
 ('HS085', 'Nguyễn Long', 'Ông Trần Hùng', 'nam', 'Hải Châu', 'L006'),
 ('HS086', 'Trần Liên', 'Mẹ Lê Hoa', 'nữ', 'Cẩm Lệ', 'L001'),
@@ -298,14 +298,59 @@ select * from hoc_sinh where gioi_tinh = 'nam' and (ma_lop is null or ho_ten_ph 
 select distinct ma_mh from phu_trach_bo_mon where hoc_ky = 'Học kỳ 2';
 
 
+-- test LIKE --
+-- a. hs có tên bắt đầu bằng từ Nguyễn
+select * from hoc_sinh where ho_ten_hs like 'Nguyễn %';
+-- b. hs có họ tên kết thúc bằng từ Nở
+select * from hoc_sinh where ho_ten_hs like '% Nở';
+-- c. hs có họ tên chứa từ thị
+select * from hoc_sinh where ho_ten_hs like '%thị%';
+-- d. hs chứa từ thị ở giữa 
+select * from hoc_sinh where ho_ten_hs like '%thị%' and ho_ten_hs not like 'thị%' and ho_ten_hs not like '%thị';
+-- e. hs có họ tên với độ dài 30 ký tự 
+select * from hoc_sinh where char_length(ho_ten_hs) = 30;
+-- f. hs có họ tên tối đa 30 ký tự
+select * from hoc_sinh where char_length(ho_ten_hs) <= 30;
+-- g. hs có họ tên với độ dài tối đa là 30 ký tự và bắt đầu bằng ký tự N
+select * from hoc_sinh where char_length(ho_ten_hs) <=30 and ho_ten_hs like 'n%';
+-- h hs có họ tên bắt đầu bằng N, T, V
+select * from hoc_sinh where ho_ten_hs like 'n%' or ho_ten_hs like 'v%' or ho_ten_hs like 't%';
+-- i. hs có tên không được bắt đầu bằng n t v
+select * from hoc_sinh where ho_ten_hs like '%n' and ho_ten_hs not like'n%';
+-- j hs có họ tên với phần họ có 4 ký tự
+select * from hoc_sinh where ho_ten_hs like '____%';
+
+-- test orderbyte
+-- a. thông tin toàn bộ hs, sắp xếp tăng dần theo họ tên hs
+select * from hoc_sinh order by ho_ten_hs asc ;
+-- b. sắp xếp giảm dần theo địa chỉ
+select * from hoc_sinh order by dia_chi desc;
+-- c. sắp xếp tăng dần theo họ tên hs và giảm theo địa chỉ
+select * from hoc_sinh order by ho_ten_hs asc, dia_chi desc;
 
 
+-- join
+-- a.
+select * from hoc_sinh inner join lop on hoc_sinh.ma_lop = lop.ma_lop;
+-- b.
+select * from hoc_sinh inner join ket_qua_hoc_tap on hoc_sinh.ma_hs = ket_qua_hoc_tap.ma_hs;
+-- c.
+select * from phu_trach_bo_mon inner join giao_vien on phu_trach_bo_mon.ma_GVpt = giao_vien.ma_gv;
 
 
+-- join nhiều bảng
+-- a.
+select ma_hs, ho_ten_hs, gioi_tinh, lop.ma_lop, ten_lop, nam_hoc, ma_GVcn, ho_ten_GV from lop 
+inner join hoc_sinh on lop.ma_lop = hoc_sinh.ma_lop
+inner join giao_vien on lop.ma_GVcn = giao_vien.ma_GV;
+-- b 
+select hoc_sinh.ma_hs, ho_ten_hs, hoc_ky, mon_hoc.ma_mh, ten_mh, diem_thi_giua_ky, diem_thi_cuoi_ky from hoc_sinh
+inner join ket_qua_hoc_tap on hoc_sinh.ma_hs = ket_qua_hoc_tap.ma_hs
+inner join mon_hoc on p.ma_mh = mon_hoc.ma_mh;
 
-
-
-
+-- distinct
+select distinct ho_ten_hs from hoc_sinh;
+select distinct ma_lop from lop;
 
 drop table giao_vien;
 drop table hoc_sinh;
