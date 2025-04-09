@@ -297,7 +297,6 @@ select * from hoc_sinh where gioi_tinh = 'nam' and (ma_lop is null or ho_ten_ph 
 -- i. mã môn học của những môn được dạy trong hk2 -- 
 select distinct ma_mh from phu_trach_bo_mon where hoc_ky = 'Học kỳ 2';
 
-
 -- test LIKE --
 -- a. hs có tên bắt đầu bằng từ Nguyễn
 select * from hoc_sinh where ho_ten_hs like 'Nguyễn %';
@@ -320,22 +319,31 @@ select * from hoc_sinh where ho_ten_hs like '%n' and ho_ten_hs not like'n%';
 -- j hs có họ tên với phần họ có 4 ký tự
 select * from hoc_sinh where ho_ten_hs like '____%';
 
--- test orderbyte
+-- orderbyte
 -- a. thông tin toàn bộ hs, sắp xếp tăng dần theo họ tên hs
 select * from hoc_sinh order by ho_ten_hs asc ;
 -- b. sắp xếp giảm dần theo địa chỉ
 select * from hoc_sinh order by dia_chi desc;
 -- c. sắp xếp tăng dần theo họ tên hs và giảm theo địa chỉ
 select * from hoc_sinh order by ho_ten_hs asc, dia_chi desc;
+-- d. họ tên hs tăng dần, địa chỉ tăng dần
+select * from hoc_sinh order by ho_ten_hs asc, dia_chi asc;
+-- e. họ tên giảm, dịa chỉ giảm
+select * from hoc_sinh order by ho_ten_hs desc, dia_chi desc;
+-- f. họ tên hs , địa chỉ giảm, họ tên ph tăng
+select *  from hoc_sinh order by ho_ten_hs desc, dia_chi desc, ho_ten_ph asc;
+-- trả lời thêm, trong orderbyte từ khoá ASC không nhất thiết phải ghi trong select vì nó ngầm mặc định như vậy rồi
 
-
--- join
--- a.
+-- join 2 bảng
+-- a. 
 select * from hoc_sinh inner join lop on hoc_sinh.ma_lop = lop.ma_lop;
 -- b.
 select * from hoc_sinh inner join ket_qua_hoc_tap on hoc_sinh.ma_hs = ket_qua_hoc_tap.ma_hs;
 -- c.
 select * from phu_trach_bo_mon inner join giao_vien on phu_trach_bo_mon.ma_GVpt = giao_vien.ma_gv;
+-- d. nếu chưa phân lớp thì sẽ không hiện ra trừ khi chúng ta thay inner join bằng left join để lấy ra giá trị bên trái 
+-- e. nếu chưa có kq thi, thì sẽ không hiện ra
+-- f. nếu có giáo viên nào ch phụ trách thì sẽ không hiện ra giáo viên đó
 
 
 -- join nhiều bảng
