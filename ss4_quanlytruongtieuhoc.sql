@@ -3,11 +3,11 @@ use quan_ly_truong_tieu_hoc;
 
 -- tạo bảng giáo viên --
 create table giao_vien(
-ma_GV char(5) primary key,
-ho_ten_GV nvarchar(50)
+ma_gv char(5) primary key,
+ho_ten_gv nvarchar(50)
 );
 -- add dữ liệu --
-insert into giao_vien(ma_GV, ho_ten_GV)
+insert into giao_vien(ma_gv, ho_ten_gv)
 values
 ('GV001', 'Nguyễn Bảo'),
 ('GV002', 'Nguyễn Văn Thành Tài'),
@@ -23,12 +23,12 @@ values
 create table lop(
 ma_lop char(5) primary key,
 ten_lop nvarchar(50),
-ma_GVcn char(5),
+ma_gvcn char(5),
 nam_hoc varchar(40),
-foreign key (ma_GVcn) references giao_vien(ma_GV)
+foreign key (ma_gvcn) references giao_vien(ma_gv)
 );
 -- add dữ liệu -- 
-insert into lop(ma_lop, ten_lop, ma_GVcn, nam_hoc)
+insert into lop(ma_lop, ten_lop, ma_gvcn, nam_hoc)
 values 
 ('L001', ' Lớp 1A' , 'GV001', '2025-2026'),
 ('L002', ' Lớp 2A' , 'GV009', '2025-2026'),
@@ -238,17 +238,17 @@ values
 ('HS050', 'Học Kỳ 2', 'MH007', 8.1, 5.8, '2025-02-16 09:25:00');
 -- tạo bảng phụ trách bộ môn --
 create table phu_trach_bo_mon(
-ma_GVpt char(5),
+ma_gvpt char(5),
 ma_lop char(5),
 ma_mh char(5),
 hoc_ky varchar(15),
-primary key (ma_GVpt, ma_lop, ma_mh),
-foreign key (ma_GVpt) references giao_vien(ma_GV),
+primary key (ma_gvpt, ma_lop, ma_mh),
+foreign key (ma_gvpt) references giao_vien(ma_gv),
 foreign key (ma_lop) references lop(ma_lop),
 foreign key (ma_mh) references mon_hoc(ma_mh)
 );
 -- add dữ liệuu --
-insert into phu_trach_bo_mon(ma_GVpt,ma_lop,ma_mh,hoc_ky)
+insert into phu_trach_bo_mon(ma_gvpt,ma_lop,ma_mh,hoc_ky)
 values
 ('GV001', 'L003', 'MH007', 'Học kỳ 1'),
 ('GV002', 'L008', 'MH001', 'Học kỳ 1'),
@@ -270,6 +270,7 @@ values
 ('GV008', 'L008', 'MH003', 'Học kỳ 2'),
 ('GV009', 'L006', 'MH010', 'Học kỳ 2'),
 ('GV010', 'L003', 'MH006', 'Học kỳ 2');
+
 -- select không dùng where --
 -- liệt kê toàn bộ thông tin giáo viên trong trường--
 select * from giao_vien;
@@ -277,6 +278,7 @@ select * from giao_vien;
 select hs.ho_ten_hs, hs.gioi_tinh, hs.ho_ten_ph from hoc_sinh hs;
 -- toàn bộ thông tin của all các lớp --
 select * from lop;
+
 -- select dùng where --
 -- a. học sinh có giới tính nam --
 select * from hoc_sinh where gioi_tinh = 'nam';
@@ -297,7 +299,7 @@ select * from hoc_sinh where gioi_tinh = 'nam' and (ma_lop is null or ho_ten_ph 
 -- i. mã môn học của những môn được dạy trong hk2 -- 
 select distinct ma_mh from phu_trach_bo_mon where hoc_ky = 'Học kỳ 2';
 
--- test LIKE --
+-- LIKE --
 -- a. hs có tên bắt đầu bằng từ Nguyễn
 select * from hoc_sinh where ho_ten_hs like 'Nguyễn %';
 -- b. hs có họ tên kết thúc bằng từ Nở
@@ -359,6 +361,109 @@ inner join mon_hoc on p.ma_mh = mon_hoc.ma_mh;
 -- distinct
 select distinct ho_ten_hs from hoc_sinh;
 select distinct ma_lop from lop;
+
+-- group by 
+-- tính điểm tb cuối kỳ theo  mã mh
+select ma_mh, max(diem_thi_cuoi_ky) as diemthicuoiky
+from ket_qua_hoc_tap
+group by ma_mh;
+ 
+-- group by having 
+-- a.liệt kê những địa chỉ khác nhau trong bảng học sinh bằng 2 cách
+-- cách 1
+select dia_chi 
+from hoc_sinh
+group by dia_chi;
+-- cách 2 
+select distinct dia_chi from hoc_sinh;
+-- b. liệt kê ho_ten_hs, gioi_tinh 
+select ho_ten_hs, gioi_tinh 
+from hoc_sinh
+group by ho_ten_hs, gioi_tinh ;
+-- c.
+select ho_ten_hs 
+from hoc_sinh
+group by ho_ten_hs;
+
+
+-- bt subquery
+-- a học sinh chưa từng thi môn nào --
+select ho_ten_hs 
+from hoc_sinh 
+where ma_hs not in 
+(select distinct ma_hs from ket_qua_hoc_tap);
+-- b giáo viên chưa từng phụ trách bộ môn nào
+select ho_ten_GV
+from giao_vien
+where ma_gv not in
+(select distinct ma_gvpt from phu_trach_bo_mon );
+-- c. giáo viên chưa từng chủ nhiệm lớp 
+select ho_ten_GV 
+from giao_vien
+where ma_GV not in
+(select distinct ma_GVcn from lop);
+-- d. môn học chưa từng thi lần nào
+select ten_mh
+from mon_hoc
+where ma_mh not in
+(select distinct ma_mh from ket_qua_hoc_tap);
+-- e. đếm sl địa chỉ, 
+
+-- union
+-- a. hs nam ở thanh khê và nữ ở hải châu
+select ho_ten_hs, gioi_tinh, dia_chi 
+from hoc_sinh
+where gioi_tinh = 'nam' and dia_chi like '%Thanh Khê%'
+
+union 
+
+select ho_ten_hs, gioi_tinh, dia_chi
+from hoc_sinh
+where gioi_tinh = 'nữ' and dia_chi like '%Hải Châu%';
+
+-- b. họ tên của học sinh và gv trong toàn trường
+select ho_ten_hs as ho_ten, null as ho_ten_gv
+from hoc_sinh
+
+union 
+
+select null as ho_ten, ho_ten_GV
+from giao_vien;
+
+-- c. họ tên, nghề nghiệp của hs và gv (nghề nghiệp bao gồm : hs và gv)
+select ho_ten_hs as ho_ten, 'học sinh' as nghe_nghiep
+from hoc_sinh
+union
+select ho_ten_Gv as ho_ten, 'giáo viên' as nghe_nghiep
+from giao_vien;
+-- d. những học sinh đang học ở 2019-2020 và hs chưa từng thi toán và tiếng việt
+select ma_hs, 'năm học' as ngay_gio_thi_cuoi_ky
+from ket_qua_hoc_tap
+union
+select ma_hs, 'chưa từng thi toán và tiếng việt' 
+from ket_qua_hoc_tap;
+
+-- limit and limit offset
+select * from hoc_sinh limit 10 offset 1;
+
+-- exists
+select ho_ten_hs
+from hoc_sinh hs
+where exists(
+	select 1
+    from ket_qua_hoc_tap kq
+    where kq.ma_hs = hs.ma_hs and kq.ma_mh = 'MH002');
+    
+-- in
+select ho_ten_hs
+from hoc_sinh hs
+where ma_hs in (
+	select ma_hs 
+    from ket_qua_hoc_tap
+    where ma_mh = 'MH002');
+
+
+
 
 drop table giao_vien;
 drop table hoc_sinh;
